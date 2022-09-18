@@ -3,6 +3,7 @@ extends Node2D
 # Built In Functions
 
 func _ready() -> void:
+	randomize()
 	var the_chosen_one: int = randi() % $"%Characters".get_child_count()
 	for i in $"%Characters".get_child_count():
 		$"%Characters".get_child(i).visible = (i == the_chosen_one)
