@@ -1,0 +1,21 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=2]
+
+[ext_resource path="res://asset/shader/WaterShader.tres" type="Shader" id=1]
+
+[sub_resource type="OpenSimplexNoise" id=3]
+seed = 4401
+octaves = 1
+
+[sub_resource type="NoiseTexture" id=2]
+width = 384
+height = 192
+seamless = true
+noise = SubResource( 3 )
+
+[resource]
+shader = ExtResource( 1 )
+shader_param/reflect_color = Color( 0.619608, 0.137255, 0.254902, 1 )
+shader_param/opacity = 0.25
+shader_param/wave_speed = 0.5
+shader_param/noise0 = SubResource( 2 )
+shader_param/noise1 = SubResource( 2 )

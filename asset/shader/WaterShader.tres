@@ -1,0 +1,24 @@
+[gd_resource type="Shader" format=2]
+
+[resource]
+code = "shader_type canvas_item;
+
+// opacity could easily have been in reflect_color's alpha channel but I decided to leave it as is
+// to make the control pop up more understandable.
+uniform vec4 reflect_color: hint_color = vec4(0.62, 0.137, 0.255, 1.0);
+uniform float opacity: hint_range(0.0, 1.0, 0.001) = 0.25;
+uniform float wave_speed: hint_range(0.0, 1.0, 0.001) = 0.5;
+uniform sampler2D noise0;
+uniform sampler2D noise1;
+
+void fragment() {
+	vec3 noise = texture(noise0, UV + vec2(0.0, TIME * 0.35 * wave_speed)).rgb * 0.5 + texture(noise1, UV + vec2(TIME * 0.25 * wave_speed, 0.0)).rgb * 0.5;
+	vec2 st = SCREEN_UV;
+	vec2 noise_uv = (noise.xy + vec2(sin(TIME * wave_speed * 2.0) * 0.5)) * 0.01;
+	st.y = st.y + SCREEN_PIXEL_SIZE.y / TEXTURE_PIXEL_SIZE.y * UV.y * 2.0;
+	COLOR = texture(SCREEN_TEXTURE, st + noise_uv);
+	COLOR.rgb = mix(vec3(1.0) - reflect_color.rgb, COLOR.rgb * (vec3(1.0) - reflect_color.rgb), noise);
+	COLOR.rgb *= opacity;
+	COLOR.rgb += texture(SCREEN_TEXTURE, SCREEN_UV + noise_uv).rgb * (1.0 - opacity);
+	COLOR.a = texture(TEXTURE, UV + vec2(0.0, noise_uv.y)).a;
+}"

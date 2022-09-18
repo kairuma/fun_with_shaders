@@ -1,0 +1,99 @@
+[gd_scene load_steps=13 format=2]
+
+[ext_resource path="res://asset/material/WaterMaterial.tres" type="Material" id=1]
+[ext_resource path="res://asset/img/pool_back.png" type="Texture" id=2]
+[ext_resource path="res://asset/img/vfx/water.png" type="Texture" id=3]
+[ext_resource path="res://scene/vfx/Pool.gd" type="Script" id=4]
+[ext_resource path="res://asset/img/pool_front.png" type="Texture" id=5]
+[ext_resource path="res://asset/img/characters/scrambler.png" type="Texture" id=6]
+[ext_resource path="res://asset/img/characters/cat_god.png" type="Texture" id=7]
+[ext_resource path="res://asset/img/characters/flyball.png" type="Texture" id=8]
+[ext_resource path="res://asset/img/characters/lich_head.png" type="Texture" id=9]
+[ext_resource path="res://asset/img/characters/anna_p_hotcakes.png" type="Texture" id=10]
+
+[sub_resource type="Animation" id=1]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Visual:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 0, 0 ) ]
+}
+
+[sub_resource type="Animation" id=2]
+resource_name = "hover"
+length = 6.4
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("Visual:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 3.2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector2( 0, 10 ), Vector2( 0, -10 ) ]
+}
+
+[node name="Pool" type="Node2D"]
+script = ExtResource( 4 )
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="PoolBack" type="Sprite" parent="Visual"]
+position = Vector2( 0, -19 )
+texture = ExtResource( 2 )
+
+[node name="Characters" type="Node2D" parent="Visual"]
+unique_name_in_owner = true
+
+[node name="AnnaPHotcakes" type="Sprite" parent="Visual/Characters"]
+visible = false
+position = Vector2( -95, -66 )
+rotation = -0.125608
+texture = ExtResource( 10 )
+
+[node name="CatGod" type="Sprite" parent="Visual/Characters"]
+visible = false
+position = Vector2( 59, -100 )
+rotation = 0.269275
+texture = ExtResource( 7 )
+
+[node name="Flyball" type="Sprite" parent="Visual/Characters"]
+visible = false
+position = Vector2( 65, 15 )
+texture = ExtResource( 8 )
+
+[node name="LichHead" type="Sprite" parent="Visual/Characters"]
+visible = false
+position = Vector2( -39, -126 )
+rotation = -0.20712
+texture = ExtResource( 9 )
+
+[node name="Scrambler" type="Sprite" parent="Visual/Characters"]
+visible = false
+position = Vector2( 92, -60 )
+rotation = 0.436723
+texture = ExtResource( 6 )
+
+[node name="Water" type="Sprite" parent="Visual"]
+unique_name_in_owner = true
+material = ExtResource( 1 )
+texture = ExtResource( 3 )
+
+[node name="PoolFront" type="Sprite" parent="Visual"]
+position = Vector2( 0, 61 )
+texture = ExtResource( 5 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+autoplay = "hover"
+anims/RESET = SubResource( 1 )
+anims/hover = SubResource( 2 )

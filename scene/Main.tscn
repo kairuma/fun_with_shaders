@@ -1,0 +1,249 @@
+[gd_scene load_steps=13 format=2]
+
+[ext_resource path="res://scene/Main.gd" type="Script" id=1]
+[ext_resource path="res://scene/Sunset.tscn" type="PackedScene" id=2]
+[ext_resource path="res://asset/bgm/gymnopedies.ogg" type="AudioStream" id=3]
+[ext_resource path="res://asset/sfx/impact.wav" type="AudioStream" id=4]
+[ext_resource path="res://asset/sfx/fade_out.wav" type="AudioStream" id=5]
+[ext_resource path="res://asset/sfx/fade_in.wav" type="AudioStream" id=6]
+[ext_resource path="res://asset/img/transition.png" type="Texture" id=9]
+
+[sub_resource type="Shader" id=27]
+code = "shader_type canvas_item;
+
+uniform float cutoff: hint_range(0.0, 10.0, 0.001) = 0.0;
+uniform float smooth_size: hint_range(0.0, 1.0, 0.001) = 0.1;
+uniform sampler2D mask_tex;
+uniform bool crt = false;
+uniform float impact = 0.0;
+uniform vec2 impact_center = vec2(0.5, 0.5);
+
+vec3 crt_glow(sampler2D tex, vec2 st) {
+	float warp = 0.15;
+	float scan = 0.75;
+	vec2 dc = abs(0.5 - st);
+	dc *= dc;
+	st.x -= 0.5;
+	st.x *= 1.0 + dc.y * 0.5 * warp;
+	st.x += 0.5;
+	st.y -= 0.5;
+	st.y *= 1.0 + dc.x * 0.8 * warp;
+	st.y += 0.5;
+	float apply = abs(sin(500.0 * st.y - TIME * 3.0) * 0.5 * scan);
+	vec3 t = texture(tex, st).rgb;
+	vec3 result = mix(texture(tex, st).rgb, vec3(0.0), apply);
+	result += mix(texture(tex, st + vec2(0.00125)).rgb, vec3(0.0), apply);
+	result += mix(texture(tex, st - vec2(0.00125)).rgb, vec3(0.0), apply);
+	result *= 0.35;
+	return result;
+}
+
+vec2 impact_ring(vec2 st) {
+	float t = 1.0 - impact;
+	st -= impact_center;
+	float d = length(st);
+	float circle = smoothstep(t - 0.1, t + 0.1, d);
+	circle *= 1.0 - circle;
+	return st * circle;
+}
+
+void fragment() {
+	vec2 st = UV + impact_ring(UV) * impact;
+	vec3 c;
+	if (crt) {
+		c.r = crt_glow(TEXTURE, st + vec2(impact * 0.0125, 0.0)).r;
+		c.g = crt_glow(TEXTURE, st - vec2(0.0, impact * 0.0125)).g;
+		c.b = crt_glow(TEXTURE, st - vec2(impact * 0.0125, 0.0)).b;
+	} else {
+		c.r = texture(TEXTURE, st + vec2(impact * 0.0125, 0.0)).r;
+		c.g = texture(TEXTURE, st - vec2(0.0, impact * 0.0125)).g;
+		c.b = texture(TEXTURE, st - vec2(impact * 0.0125, 0.0)).b;
+	}
+	float value = texture(mask_tex, st).r;
+	float alpha = smoothstep(cutoff, cutoff + smooth_size, value + (1.0 - smooth_size) + smooth_size);
+	COLOR = vec4(c, alpha);
+}"
+
+[sub_resource type="ShaderMaterial" id=28]
+shader = SubResource( 27 )
+shader_param/cutoff = 0.0
+shader_param/smooth_size = 1.0
+shader_param/crt = false
+shader_param/impact = 0.0
+shader_param/impact_center = Vector2( 0.5, 0.5 )
+shader_param/mask_tex = ExtResource( 9 )
+
+[sub_resource type="Animation" id=29]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:material:shader_param/cutoff")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ 0.0 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../TransitionPlayer:playing")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ false ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../TransitionPlayer:stream")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ ExtResource( 6 ) ]
+}
+
+[sub_resource type="Animation" id=30]
+resource_name = "fade_in"
+length = 0.8
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:material:shader_param/cutoff")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.8 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ 2.0, 0.0 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("../TransitionPlayer:playing")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0.1 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ true ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../TransitionPlayer:stream")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ ExtResource( 6 ) ]
+}
+
+[sub_resource type="Animation" id=31]
+resource_name = "fade_out"
+length = 0.8
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:material:shader_param/cutoff")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.8 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ 0.0, 2.0 ]
+}
+tracks/1/type = "method"
+tracks/1/path = NodePath("..")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0.8 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [  ],
+"method": "reset_scene"
+} ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("../TransitionPlayer:playing")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0.1 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ true ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("../TransitionPlayer:stream")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 1,
+"values": [ ExtResource( 5 ) ]
+}
+
+[node name="Main" type="Node2D"]
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_horizontal_guides_": [ -610.0 ]
+}
+
+[node name="ViewportContainer" type="ViewportContainer" parent="."]
+material = SubResource( 28 )
+margin_right = 800.0
+margin_bottom = 600.0
+
+[node name="Viewport" type="Viewport" parent="ViewportContainer"]
+size = Vector2( 800, 600 )
+handle_input_locally = false
+render_target_update_mode = 3
+
+[node name="Sunset" parent="ViewportContainer/Viewport" instance=ExtResource( 2 )]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("../ViewportContainer")
+autoplay = "fade_in"
+anims/RESET = SubResource( 29 )
+anims/fade_in = SubResource( 30 )
+anims/fade_out = SubResource( 31 )
+
+[node name="BgmPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 3 )
+autoplay = true
+
+[node name="ImpactPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 4 )
+volume_db = -12.0
+pitch_scale = 1.08
+
+[node name="TransitionPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 6 )
+volume_db = -8.0
+
+[connection signal="add_impact" from="ViewportContainer/Viewport/Sunset" to="." method="_add_impact"]
+[connection signal="reset" from="ViewportContainer/Viewport/Sunset" to="AnimationPlayer" method="play" binds= [ "fade_out" ]]
+[connection signal="toggle_crt" from="ViewportContainer/Viewport/Sunset" to="." method="_toggle_crt"]
